@@ -1,0 +1,13 @@
+datasets
+evaluate
+transformers
+torch
+scikit-learn
+optimum[onnxruntime]
+accelerate
+xformers
+numpy
+grade
+openpyxl
+tqdm
+bs4
