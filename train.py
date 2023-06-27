@@ -5,10 +5,6 @@ import numpy as np
 from datasets import load_dataset
 from transformers import AutoModelForTokenClassification, AutoTokenizer, DataCollatorForTokenClassification, TrainingArguments, Trainer
 
-# 加载数据集
-#datasets = load_dataset("peoples_daily_ner")
-# data_file = "./data_file/train.json"data_file
-
 LABELS = list("BIESO")
 ID2LABEL = {str(idx):label for (idx, label) in enumerate(LABELS)}
 
@@ -16,11 +12,8 @@ data_file = "./data_file/train.json"
 model_name = "nghuyong/ernie-3.0-base-zh"  # 所使用模型
 dataset = load_dataset("json", data_files=data_file, cache_dir='cache')
 dataset = dataset["train"]
-#eval_dataset = dataset.train_test_split(.1)["test"]
-#label_list = datasets["train"].features["ner_tags"].feature.names
-#label_list = datasets["train"].features["ner_tags"]
+
 # 数据集处理
-#tokenizer = AutoTokenizer.from_pretrained(model_name)
 tokenizer = AutoTokenizer.from_pretrained("nghuyong/ernie-3.0-base-zh",cache_dir='cache')
 
 def tags2feature(tags):
@@ -48,7 +41,6 @@ dataset = tokenized_datasets
 eval_dataset = dataset.train_test_split(.1)["test"]
 
 # 构建评估函数
-# seqeval_metric = evaluate.load("seqeval")
 def compute_metrics(p):
     predictions, labels = p
     predictions = np.argmax(predictions, axis=-1)
@@ -61,7 +53,6 @@ def compute_metrics(p):
         [LABELS[l] for (p, l) in zip(prediction, label) if l != -100]
         for prediction, label in zip(predictions, labels)
     ]
-    # results = seqeval_metric.compute(predictions=true_predictions, references=true_labels, mode="strict", scheme="IOB2")
     return {
         "precision": metrics.precision_score(true_labels, true_predictions),
         "recall": metrics.recall_score(true_labels, true_predictions),
@@ -88,9 +79,7 @@ args = TrainingArguments(
 trainer = Trainer(
     model,
     args,
-    # train_dataset=tokenized_datasets["dataset"],
     train_dataset=dataset,
-    # eval_dataset=tokenized_datasets["dataset"],
     eval_dataset=eval_dataset,
     data_collator=DataCollatorForTokenClassification(tokenizer),
     tokenizer=tokenizer,
@@ -99,7 +88,5 @@ trainer = Trainer(
 
 # 训练与评估
 trainer.train()
-#trainer.evaluate(tokenized_datasets["test"])
-trainer.evaluate()
 
 
